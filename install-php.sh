@@ -8,10 +8,18 @@
 #   CLAUDE.md              created, or completed, with an import of that AGENTS.md
 # All of it is ignored by git in that clone (.git/info/exclude), except a CLAUDE.md that already existed.
 # Also migrates an install made by the former install.sh.
-# Usage: install-php.sh [project directory] (default: the current directory). Run again to update.
+# Usage, from the project: curl -fsSL https://raw.githubusercontent.com/hbenabdallah/php-agent-config/main/install-php.sh | bash
+# Or with a path: ... | bash -s -- path/to/project
+# Run again to update. AGENT_CONFIG_REF selects a tag, branch or commit (default: main).
 set -euo pipefail
 
-source_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+source_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-.}")" && pwd)
+if [[ ! -f "$source_dir/lib/install-common.sh" ]]; then
+    source_dir=$(mktemp -d)
+    trap 'rm -rf "$source_dir"' EXIT
+    curl -fsSL "https://github.com/hbenabdallah/php-agent-config/archive/${AGENT_CONFIG_REF:-main}.tar.gz" \
+        | tar -xz --strip-components=1 -C "$source_dir"
+fi
 target=$(cd "${1:-.}" && pwd)
 # shellcheck source=lib/install-common.sh
 . "$source_dir/lib/install-common.sh"
@@ -130,7 +138,7 @@ else
 fi
 
 if [[ ! -d "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/review-changes" ]]; then
-    echo "The PHP overlays complete the global skills: run install-global.sh once on this machine." >&2
+    echo "The PHP overlays complete the global skills: run install.sh once on this machine." >&2
 fi
 
 echo "Installed in $target: PHP rules, overlays and php-quality-setup."

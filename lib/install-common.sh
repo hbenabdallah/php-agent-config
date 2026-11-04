@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared by install-global.sh and install-php.sh.
+# Shared by install.sh and install-php.sh.
 
 marker=.installed-by-php-agent-config
 

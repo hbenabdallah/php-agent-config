@@ -3,10 +3,17 @@
 #   ~/.claude/rules/agent-engineering.md   the engineering rules, loaded in every session
 #   ~/.claude/skills/                      review-changes, refactor-safely, write-tests
 #   ~/.agents/skills/                      the same skills, for agents reading the shared skills folder
-# Usage: install-global.sh. Run again to update.
+# Usage: curl -fsSL https://raw.githubusercontent.com/hbenabdallah/php-agent-config/main/install.sh | bash
+# Run again to update. AGENT_CONFIG_REF selects a tag, branch or commit (default: main).
 set -euo pipefail
 
-source_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+source_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-.}")" && pwd)
+if [[ ! -f "$source_dir/lib/install-common.sh" ]]; then
+    source_dir=$(mktemp -d)
+    trap 'rm -rf "$source_dir"' EXIT
+    curl -fsSL "https://github.com/hbenabdallah/php-agent-config/archive/${AGENT_CONFIG_REF:-main}.tar.gz" \
+        | tar -xz --strip-components=1 -C "$source_dir"
+fi
 # shellcheck source=lib/install-common.sh
 . "$source_dir/lib/install-common.sh"
 
