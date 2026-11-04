@@ -1,6 +1,7 @@
 ---
 name: php-quality-setup
-description: Set up or complete the quality tooling of a PHP project - PHP CS Fixer (PER-CS 2.0), PHPStan at max level with strict rules, Rector, and one composer "check" script running them with the tests. Use when a PHP project has no formatter, static analysis or Rector, when asked to "add quality tools", "set up PHPStan/Rector/CS Fixer", or before applying AGENTS.md to a project that has no tooling.
+description: Set up PHP CS Fixer, PHPStan, Rector and one composer "check" script in a PHP project.
+disable-model-invocation: true
 ---
 
 # Set up PHP quality tooling
@@ -60,11 +61,17 @@ Make CI run `composer check`.
 
 On an existing project the first run reports a lot. In this order:
 
-1. `composer cs:fix` and `vendor/bin/rector` (automatic; one commit each, nothing else in them; run the tests after).
-2. PHPStan: start at the level where the project passes, then raise it one level per change, fixing the code.
+1. Formatting first: remove every risky rule from the config (`@PER-CS2x0:risky`, `declare_strict_types`, `final_class`,
+   `strict_comparison`, `strict_param`, `date_time_immutable`, `modernize_types_casting`, `protected_to_private`), set
+   `setRiskyAllowed(false)`, run `composer cs:fix`, and commit that alone.
+2. Risky rules change behaviour (`==` becomes `===`, strict types raise `TypeError`, `final` breaks mocks and
+   subclasses). Add them back one at a time, only where tests cover the code, one commit each. Values read from a
+   database are often strings: check them before enabling strict comparison.
+3. `vendor/bin/rector`: read the diff, run the tests, commit it alone.
+4. PHPStan: start at the level where the project passes, then raise it one level per change, fixing the code.
    A baseline (`--generate-baseline`) is acceptable only to adopt PHPStan on a large legacy code base, decided by
    the user, and it only ever shrinks: new code never adds to it.
-3. Rules the project disagrees with: remove them from the config, with a one-line comment saying why.
+5. Rules the project disagrees with: remove them from the config.
 
 ## 6. Verify
 
