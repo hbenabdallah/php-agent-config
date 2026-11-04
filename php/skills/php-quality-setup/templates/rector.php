@@ -19,7 +19,6 @@ return RectorConfig::configure()
         instanceOf: true,
         phpunitCodeQuality: true,
     )
-    // Static or instance assertion calls are a project choice: keep the one in place.
     ->withSkip([PreferPHPUnitThisCallRector::class])
     ->withImportNames(importShortClasses: false, removeUnusedImports: true)
     ->withParallel();

@@ -1,16 +1,12 @@
-# PHP coding rules for agents
+---
+paths:
+  - "**/*.php"
+---
 
-Technical rules for writing PHP: types, classes, control flow, errors, tests, tooling. They say nothing about
-architecture (layers, bounded contexts, folders): every project has its own, read it from the code and its own docs.
+# PHP rules
 
-## Precedence
-
-1. The project's own instructions (a project section below, `CLAUDE.md`, docs) and its tooling configuration
-   (`.php-cs-fixer.dist.php`, `pint.json`, `phpstan.neon`, `rector.php`, `phpcs.xml`) win over this file.
-2. Then the code already there: before writing, read two or three neighbouring files of the same kind and do as they
-   do. A second way of doing the same thing is worse than a suboptimal but consistent one.
-3. Then these rules. When one of them conflicts with the existing code, say so; don't settle it alone, and don't
-   rewrite the existing code to match unless asked.
+Technical rules only: architecture belongs to each project. The project's instructions, its tooling configuration and
+the code already there win over this file.
 
 ## Standards
 
@@ -99,63 +95,30 @@ architecture (layers, bounded contexts, folders): every project has its own, rea
 
 ## Comments
 
-- No comment saying what the code does: rename, extract a method or a variable until the code says it.
-- A comment only for a why the code cannot express (a constraint, a workaround with its reason and link, a non-obvious
-  decision). A class or public method may carry a docblock stating its contract when its name cannot. Some projects
-  forbid even those: follow the project.
-- No commented-out code, no `TODO` without a ticket reference, no change log in comments (git has it).
-- No debugging leftovers: `dump()`, `dd()`, `var_dump()`, `print_r()`, `die()`, `error_log()` for tracing.
+- No comment saying what the code does: rename or extract until the code says it. Some projects forbid even docblocks:
+  follow the project.
+- No `TODO` without a ticket reference, no change log in comments.
+- No `dump()`, `dd()`, `var_dump()`, `print_r()`, `die()`, `error_log()` for tracing.
 
 ## Security
 
-- SQL through prepared statements or the query builder only; never concatenate input into SQL, shell commands
-  (`escapeshellarg` if a shell is unavoidable), paths or headers.
-- Escape output for its context (HTML, attribute, URL, JSON); use the template engine's escaping.
-- Never `eval`, never `unserialize` untrusted data (or with `['allowed_classes' => [...]]`), never `extract`.
-- Secrets come from the environment or a secret store, never from the code or a committed file.
-- `random_bytes()`/`random_int()` for anything secret, `password_hash()`/`password_verify()` for passwords,
-  `hash_equals()` to compare tokens.
-- Never run or include code of a project you are only analysing.
-
-## Performance
-
-- Measure before optimising; readable first.
-- No query, HTTP call or file read inside a loop over records (N+1): load in bulk before the loop.
-- Generators or chunked iteration for large data sets instead of loading everything in memory.
+- SQL through prepared statements or the query builder only; `escapeshellarg` if a shell is unavoidable.
+- Use the template engine's escaping.
+- Never `eval`, never `extract`, never `unserialize` untrusted data (or with `['allowed_classes' => [...]]`).
+- `random_bytes()`/`random_int()` for secrets, `password_hash()`/`password_verify()`, `hash_equals()` for tokens.
 
 ## Dependencies
 
-- Add a Composer dependency only when it saves real work; prefer what the project already has.
-- Constraints with `^`, the lock file committed for applications, `composer audit` clean.
-- Never edit `vendor/`.
+- Add a Composer dependency only when it saves real work. `^` constraints, lock committed for applications,
+  `composer audit` clean. Never edit `vendor/`.
 
 ## Tests
 
-- Every change of behaviour comes with a test; a bug fix starts with a test that fails without the fix.
-- Follow the project's framework and style (PHPUnit or Pest, folder, base classes, helpers). Test classes `final`.
-- One behaviour per test, named as a sentence (`testAnExpiredCouponIsRefused`), arranged as given / when / then.
-- `assertSame` over `assertEquals`; an assertion message saying why when the failure would be unclear.
-- Test through the public API, never private methods. Don't mock value objects or the class under test; prefer real
-  objects, then in-memory fakes, then stubs; mocks only to check an interaction that is the behaviour itself.
-- Deterministic: no real clock, randomness, network or shared state; inject them.
-- Data providers for the same behaviour over several inputs.
+- Every change of behaviour comes with a test. Test classes `final`.
+- `assertSame` over `assertEquals`. Test through the public API. Don't mock value objects or the class under test.
 
-## Tooling and verification
+## Tooling
 
-- Run the project's checks before handing work back (`composer check`, `composer test`, `make check`, CI scripts):
-  formatter, static analysis, tests. Report failures as they are, with their output.
-- Static analysis at the project's level (PHPStan or Psalm; aim for the highest level on new code). Never add a
-  baseline entry, `@phpstan-ignore` or `@psalm-suppress` to make a check pass: fix the code. A false positive is
-  reported, with why.
+- Static analysis at the project's level. Never add a baseline entry, `@phpstan-ignore` or `@psalm-suppress` to make a
+  check pass: fix the code, or report a false positive with why.
 - Rector and the formatter are run, never fought: if they rewrite your code, keep their version.
-- Verify behaviour in the running application (CLI command, HTTP request, worker) when the change can be observed
-  there, not only through unit tests.
-
-## Working method
-
-- Read before writing: the files you change, their callers, their tests, and the neighbouring code you will imitate.
-- Smallest change that solves the task. No unrelated refactoring, renaming or reformatting in the same change; note
-  what you saw instead.
-- Never change a public API, a serialised format or a database schema as a side effect: it is a decision to state.
-- Don't leave work half done: no stub, no `// implement later`, no skipped test.
-- Say what you did not do or could not verify.
