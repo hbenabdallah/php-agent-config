@@ -9,17 +9,21 @@ already there, then these rules.
 
 ## Install
 
+Once per machine, the global layer:
+
 ```sh
-git clone https://github.com/hbenabdallah/php-agent-config.git
-
-# Once per machine
-php-agent-config/install-global.sh
-
-# Once per PHP project
-php-agent-config/install-php.sh path/to/project
+curl -fsSL https://raw.githubusercontent.com/hbenabdallah/php-agent-config/main/install.sh | bash
 ```
 
-Run the same commands again to update.
+Once per PHP project, from its root, the PHP layer:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/hbenabdallah/php-agent-config/main/install-php.sh | bash
+```
+
+To target another folder, end the command with `| bash -s -- path/to/project`. Run the same commands again to update.
+Both need `curl` and `tar`, and install from `main`: set `AGENT_CONFIG_REF` on `bash` to pin a tag or commit
+(`| AGENT_CONFIG_REF=v1.0.0 bash`). From a clone, run `./install.sh` and `./install-php.sh path/to/project` directly.
 
 ## Contents
 
@@ -48,8 +52,8 @@ add for agents other than Claude Code.
 Add the project's own rules at the end of the installed `AGENTS.md`, under a heading starting with `## This project`:
 updates keep those sections.
 
-`install-php.sh` also migrates an install made by the former `install.sh`. A skill that was not installed from here is
-never replaced.
+`install-php.sh` also migrates an install made by the former PHP-only `install.sh`. A skill that was not installed
+from here is never replaced.
 
 ## License
 
