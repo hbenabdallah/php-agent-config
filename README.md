@@ -7,6 +7,11 @@ The PHP rules are technical, not architectural: types, classes, control flow, er
 PSR-1, PSR-4 and PER Coding Style 2.0. The project's instructions and tooling configuration always win, then the code
 already there, then these rules.
 
+The global rules include a "Context economy" section that keeps the context small, whatever the agent: a working
+limit of about 40 % of the window, filtered outputs, one step of a plan file per session with a written handoff, long
+runs in the background without polling, and no subagent or model switch unless asked. It includes a short plan-file
+template.
+
 ## Install
 
 Once per machine, the global layer:
