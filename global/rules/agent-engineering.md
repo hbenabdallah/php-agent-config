@@ -66,9 +66,13 @@ your agent's equivalent.
 ### Cost-aware choices
 
 - One command that does several things rather than several turns of tiny commands.
-- Don't spawn subagents unless asked: each one starts cold and re-reads context.
-- Suggest a cheaper model for mechanical work (reruns, captures, doc updates) when the agent can switch (`/model`).
-  Never switch on your own.
+- Don't spawn subagents unless asked, except for the mechanical work below: each one starts cold and re-reads
+  context.
+- Mechanical work that takes several turns (reruns, monitoring a background run, captures, doc updates) goes to the
+  agent's cheaper model (Sonnet in Claude Code). When the agent can run a subagent on a chosen model, hand it to one
+  on that model with a short, self-contained prompt (`model: sonnet`). Otherwise ask the user to switch before it
+  starts (`/model`); never switch the session's model on your own.
+- A single short command runs where you are: delegating it costs more than running it.
 
 ### Plan file
 
